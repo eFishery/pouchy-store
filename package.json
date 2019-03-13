@@ -1,0 +1,30 @@
+{
+  "name": "pouchy-store",
+  "version": "0.1.0",
+  "description": "Libraries to ease pouch-couch stack on offline first app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eFishery/pouchy-store.git"
+  },
+  "dependencies": {
+    "pouchdb": "^7.0.0",
+    "pouchdb-adapter-websql-core": "^7.0.0",
+    "react-native-sqlite-storage": "^3.3.9"
+  },
+  "keywords": [
+    "pouch",
+    "couch",
+    "offline-first",
+    "react"
+  ],
+  "author": "eFishery",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/eFishery/pouchy-store/issues"
+  },
+  "homepage": "https://github.com/eFishery/pouchy-store#readme"
+}
