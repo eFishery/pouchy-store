@@ -1,7 +1,5 @@
 # Pouchy Store
 
-"Kutipan dimas sumartoyo isi"
-
 Pouchy Store is a library to help developer create [Offline First](http://offlinefirst.org/) apps out of the box with synchronizing capabilities locally-remotely. Pouchy Store could be used for NodeJS/ReactJS and ReactNative. Pouchy Store built on top of PouchDB (local) and CouchDB (remote) stack.
 
 ## How To Use
@@ -35,6 +33,8 @@ class ModelStore extends PouchyStore {
     };
   }
 }
+
+export default new ModelStore();
 ```
 Use your model class in your app (React Example)
 ```
@@ -49,15 +49,19 @@ class App extends React {
 	}
 
 	render() {
+        modelStore.data.forEach(item => console.log(item)); // access all the data in store
 		modelStore.countUnuploadeds(); // to show number of unoploaded/synced items
 		modelStore.dataMeta.tsUpload; // to show last timestamp uploaded/synced
-		await modelStore.addItem({});
+		await modelStore.addItem({
+          someField: 'someValue',
+          anotherField: 'anotherValue',
+        });
 		await modelStore.deleteItem();
 		await modelStore.upload(); // to upload/sync database local-remote
 	}
 
 	componentDidMount() {
-		this.unsubTodos = modelStore.subscribe(this.rerender);
+		this.unsubTodos = modelStore.subscribe(this.rerender); // set callback when there is a change in store's data
 	}
 
 	componentWillUnmount() {
@@ -65,7 +69,11 @@ class App extends React {
 		await modelStore.deinitialize(); // to destroy database locally if it's needed
 	}
 
-	
+	rerender = () => {
+        this.setState({
+          _rerender: new Date(),
+        });
+    }
 }
 ```
 Available API for CRUD operation:
