@@ -1,5 +1,5 @@
-import PouchDB from './libs/PouchDB.js';
-import IPouchyStore from './PouchyStore.js';
+import PouchDB from './libs/PouchDB';
+import IPouchyStore from './PouchyStore';
 import reactNativeSqlitePlugin from './libs/pouchdb-adapter-react-native-sqlite';
 
 PouchDB.plugin(reactNativeSqlitePlugin);

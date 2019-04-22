@@ -10,13 +10,17 @@ const PREFIX_META_DB = 'meta_';
 /*
 
 class options: create getter fo these:
-- `this.isUseData` boolean: give false if you do not want to mirror db data to this.data. default to true.
+- `this.isUseData` boolean: give false if you do not want to mirror db data to
+  this.data. default to true.
 - `this.isUseRemote` boolean: give false if you do not want to sync with remote db. default to true.
 - `this.optionsRemote` optional: give object as options for remote db constructor.
 - `this.optionsLocal` optional
-- `this.single` string: give string if you want single doc, not list. this is the ID of the doc. default to undefined.
-- `this.dataDefault` optional: give array as default data, or object if single. default to `[]` if not single and `{}` if single.
-- `this.sortData` optional: function that will be called whenever there is any changes to `this.data`. must be mutable to the data.
+- `this.single` string: give string if you want single doc, not list.
+  this is the ID of the doc. default to undefined.
+- `this.dataDefault` optional: give array as default data, or object if single.
+  default to `[]` if not single and `{}` if single.
+- `this.sortData` optional: function that will be called whenever there is any changes to
+  `this.data`. must be mutable to the data.
 
 */
 
@@ -158,20 +162,18 @@ export default class PouchyStore {
         } else {
           this.data[index] = doc;
         }
+      } else if (isDeleted) {
+        // do nothing
       } else {
-        if (isDeleted) {
-          // do nothing
-        } else {
-          this.data.push(doc);
-        }
+        this.data.push(doc);
       }
       this.sortData(this.data);
     }
   }
 
-  sortData(data) {
-    // do no sorting, override this method to sort
-  }
+  // sortData(data) {
+  //   // do no sorting, override this method to sort
+  // }
 
   async persistMeta() {
     try {
@@ -185,16 +187,17 @@ export default class PouchyStore {
     if (!this.isUseRemote) return;
 
     try {
-      const replicationId = this.replicationId || await generateReplicationId(this.dbLocal, this.dbRemote, {});
+      const replicationId = this.replicationId
+        || await generateReplicationId(this.dbLocal, this.dbRemote, {});
       const replicationDoc = await this.dbLocal.get(replicationId);
       const unuploadeds = await this.dbLocal.changes({
         since: replicationDoc.last_seq,
         include_docs: true,
       });
-      for (let result of unuploadeds.results) {
-        const doc = result.doc;
+      unuploadeds.results.each((result) => {
+        const { doc } = result;
         this.dataMeta.unuploadeds[doc._id] = true;
-      }
+      });
       if (unuploadeds.results.length > 0) {
         this.persistMeta();
       }
@@ -211,15 +214,15 @@ export default class PouchyStore {
     this.handlerRemoteChange = this.dbLocal.replicate.from(this.dbRemote, {
       live: true,
       retry: true,
-    }).on('change', change => {
-      for (let doc of change.docs) {
+    }).on('change', (change) => {
+      change.docs.each((doc) => {
         this.changeFromRemote[doc._id] = true;
         this.updateMemory(doc);
-      }
+      });
       this.notifySubscribers(change.docs);
-    }).on('error', err => {
+    }).on('error', (err) => {
       console.e(`${this.name}.from`, 'error', err);
-    })
+    });
   }
 
   unwatchRemote() {
@@ -233,8 +236,8 @@ export default class PouchyStore {
       since: 'now',
       live: true,
       include_docs: true,
-    }).on('change', change => {
-      const doc = change.doc;
+    }).on('change', (change) => {
+      const { doc } = change;
       if (this.changeFromRemote[doc._id]) {
         delete this.changeFromRemote[doc._id];
       } else {
@@ -246,9 +249,9 @@ export default class PouchyStore {
           this.dataMeta.unuploadeds[doc._id] = true;
           this.persistMeta();
         }
-        this.notifySubscribers([ doc ]);
+        this.notifySubscribers([doc]);
       }
-    }).on('error', err => {
+    }).on('error', (err) => {
       console.e(`${this.name}.changes`, 'error', err);
     });
   }
@@ -264,11 +267,11 @@ export default class PouchyStore {
       since: 'now',
       live: true,
       include_docs: true,
-    }).on('change', change => {
-      const doc = change.doc;
+    }).on('change', (change) => {
+      const { doc } = change;
       if (doc._id !== ID_META_DOC) return;
       this.dataMeta = doc;
-    }).on('error', err => {
+    }).on('error', (err) => {
       console.e(`${PREFIX_META_DB}${this.name}.changes`, 'error', err);
     });
   }
@@ -297,9 +300,9 @@ export default class PouchyStore {
 
     await this.dbLocal.replicate.to(this.dbRemote);
     const ids = Object.keys(this.dataMeta.unuploadeds);
-    for (let id of ids) {
+    ids.each((id) => {
       delete this.dataMeta.unuploadeds[id];
-    }
+    });
     this.dataMeta.tsUpload = new Date().toJSON();
     this.persistMeta();
     this.notifySubscribers([]);
@@ -307,12 +310,12 @@ export default class PouchyStore {
 
   /* manipulation of array data (non-single) */
 
-  async addItem(payload, user=null) {
+  async addItem(payload, user = null) {
     const id = this.dbLocal.createId();
     await this.addItemWithId(id, payload, user);
   }
 
-  async addItemWithId(id, payload, user={}) {
+  async addItemWithId(id, payload, user = {}) {
     const now = new Date().toJSON();
     const actionBy = this.createActionBy(user);
     await this.dbLocal.put({
@@ -326,7 +329,7 @@ export default class PouchyStore {
     });
   }
 
-  async editItem(id, payload, user={}) {
+  async editItem(id, payload, user = {}) {
     const now = new Date().toJSON();
     const actionBy = this.createActionBy(user);
     const doc = await this.dbLocal.getFailSafe(id);
@@ -342,7 +345,7 @@ export default class PouchyStore {
     });
   }
 
-  async deleteItem(id, user={}) {
+  async deleteItem(id, user = {}) {
     const now = new Date().toJSON();
     const actionBy = this.createActionBy(user);
     const doc = await this.dbLocal.getFailSafe(id);
@@ -363,15 +366,15 @@ export default class PouchyStore {
   }
 
   createActionBy(user) {
-    user = { ...user };
-    delete user._id;
-    delete user._rev;
-    for (let name of [ 'created', 'updated', 'deleted', 'dirty' ]) {
-      delete user[`${name}At`];
-      delete user[`${name}By`];
-    }
-    user.clientId = this.dataMeta.clientId;
-    return user;
+    const _user = { ...user };
+    delete _user._id;
+    delete _user._rev;
+    ['created', 'updated', 'deleted', 'dirty'].each((name) => {
+      delete _user[`${name}At`];
+      delete _user[`${name}By`];
+    });
+    _user.clientId = this.dataMeta.clientId;
+    return _user;
   }
 
   /* manipulation of single data (non-array) */
@@ -401,7 +404,7 @@ export default class PouchyStore {
 
   subscribe(subscriber) {
     const index = this.subscribers.findIndex(item => item === subscriber);
-    if (index !== -1) return;
+    if (index !== -1) return () => {};
 
     this.subscribers.push(subscriber);
     return () => this.unsubscribe(subscriber);
@@ -425,12 +428,12 @@ export default class PouchyStore {
         this.data = Array.from(this.data);
       }
     }
-    for (let subscriber of this.subscribers) {
+    this.subscribers.each((subscriber) => {
       try {
         subscriber(docs);
       } catch (err) {
         console.e(err);
       }
-    }
+    });
   }
 }

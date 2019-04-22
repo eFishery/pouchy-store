@@ -4,6 +4,7 @@
   "description": "Libraries to ease pouch-couch stack on offline first app",
   "main": "index.js",
   "scripts": {
+    "test:eslint": "eslint --fix ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -26,5 +27,10 @@
   "bugs": {
     "url": "https://github.com/eFishery/pouchy-store/issues"
   },
-  "homepage": "https://github.com/eFishery/pouchy-store#readme"
+  "homepage": "https://github.com/eFishery/pouchy-store#readme",
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.2"
+  }
 }

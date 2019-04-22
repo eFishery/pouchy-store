@@ -31,7 +31,7 @@ export default class PouchDB extends IPouchDB {
   }
 
   createId() {
-    return PouchDB.createId();
+    return this.createId();
   }
 
   async getDocs() {
