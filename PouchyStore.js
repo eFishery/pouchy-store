@@ -362,6 +362,15 @@ export default class PouchyStore {
     }
   }
 
+  async checkIdExist(id) {
+    const doc = await this.dbLocal.getFailSafe(id);
+    if (!doc) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   createActionBy(user) {
     user = { ...user };
     delete user._id;
