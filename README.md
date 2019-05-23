@@ -91,7 +91,7 @@ Available API for CRUD operation:
 
 
 ## Code Example
-*TBA*
+[Pouchy Store Example on React](https://github.com/eFishery/pouchy-store-example)
 
 ## Contributor
 
