@@ -101,8 +101,10 @@ export default class PouchyStore {
       // sync data local-remote
       try {
         await checkInternet(this.urlRemote);
-        await this.dbLocal.replicate.from(this.dbRemote);
-        await this.upload();
+        await this.dbLocal.replicate.from(this.dbRemote, {
+          batch_size: 1000,
+          batches_limit: 2,
+        });
       } catch (err) {
         console.e(err);
       }
