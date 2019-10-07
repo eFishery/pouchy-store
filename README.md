@@ -91,18 +91,18 @@ Available API for CRUD operation:
 
 
 ## Code Example
-*TBA*
+[Pouchy Store Example on React](https://github.com/eFishery/pouchy-store-example)
 
 ## Contributor
 
-[Dimas Gilang Saputra](https://github.com/sumartoyo)
-[Anshorimuslim](https://github.com/ans-4175)
+[Dimas Gilang Saputra](https://github.com/sumartoyo)  
+[Anshorimuslim](https://github.com/ans-4175)  
 
 ## Credits
 
-[PouchDB](https://pouchdb.com/)
-[CouchDB](http://couchdb.apache.org/)
-[React Native SQLite Storage](https://www.npmjs.com/package/react-native-sqlite-storage)
+[PouchDB](https://pouchdb.com/)  
+[CouchDB](http://couchdb.apache.org/)  
+[React Native SQLite Storage](https://www.npmjs.com/package/react-native-sqlite-storage)  
 
 ## License
 MIT

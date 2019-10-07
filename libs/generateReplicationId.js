@@ -1,7 +1,7 @@
-/* eslint-disable */
 import Md5 from 'spark-md5';
 
 function collate(a, b) {
+
   if (a === b) {
     return 0;
   }
@@ -9,8 +9,8 @@ function collate(a, b) {
   a = normalizeKey(a);
   b = normalizeKey(b);
 
-  const ai = collationIndex(a);
-  const bi = collationIndex(b);
+  var ai = collationIndex(a);
+  var bi = collationIndex(b);
   if ((ai - bi) !== 0) {
     return ai - bi;
   }
@@ -41,9 +41,9 @@ function normalizeKey(key) {
     case 'object':
       var origKey = key;
       if (Array.isArray(key)) {
-        const len = key.length;
+        var len = key.length;
         key = new Array(len);
-        for (let i = 0; i < len; i++) {
+        for (var i = 0; i < len; i++) {
           key[i] = normalizeKey(origKey[i]);
         }
       /* istanbul ignore next */
@@ -51,9 +51,9 @@ function normalizeKey(key) {
         return key.toJSON();
       } else if (key !== null) { // generic object
         key = {};
-        for (const k in origKey) {
+        for (var k in origKey) {
           if (origKey.hasOwnProperty(k)) {
-            const val = origKey[k];
+            var val = origKey[k];
             if (typeof val !== 'undefined') {
               key[k] = normalizeKey(val);
             }
@@ -68,15 +68,15 @@ function normalizeKey(key) {
 }
 
 function arrayCollate(a, b) {
-  const len = Math.min(a.length, b.length);
-  for (let i = 0; i < len; i++) {
-    const sort = collate(a[i], b[i]);
+  var len = Math.min(a.length, b.length);
+  for (var i = 0; i < len; i++) {
+    var sort = collate(a[i], b[i]);
     if (sort !== 0) {
       return sort;
     }
   }
-  return (a.length === b.length) ? 0
-    : (a.length > b.length) ? 1 : -1;
+  return (a.length === b.length) ? 0 :
+    (a.length > b.length) ? 1 : -1;
 }
 function stringCollate(a, b) {
   // See: https://github.com/daleharvey/pouchdb/issues/40
@@ -85,12 +85,11 @@ function stringCollate(a, b) {
   return (a === b) ? 0 : ((a > b) ? 1 : -1);
 }
 function objectCollate(a, b) {
-  const ak = Object.keys(a); const
-    bk = Object.keys(b);
-  const len = Math.min(ak.length, bk.length);
-  for (let i = 0; i < len; i++) {
+  var ak = Object.keys(a), bk = Object.keys(b);
+  var len = Math.min(ak.length, bk.length);
+  for (var i = 0; i < len; i++) {
     // First sort the keys
-    let sort = collate(ak[i], bk[i]);
+    var sort = collate(ak[i], bk[i]);
     if (sort !== 0) {
       return sort;
     }
@@ -99,18 +98,19 @@ function objectCollate(a, b) {
     if (sort !== 0) {
       return sort;
     }
+
   }
-  return (ak.length === bk.length) ? 0
-    : (ak.length > bk.length) ? 1 : -1;
+  return (ak.length === bk.length) ? 0 :
+    (ak.length > bk.length) ? 1 : -1;
 }
 // The collation is defined by erlangs ordered terms
 // the atoms null, true, false come first, then numbers, strings,
 // arrays, then objects
 // null/undefined/NaN/Infinity/-Infinity are all considered null
 function collationIndex(x) {
-  const id = ['boolean', 'number', 'string', 'object'];
-  const idx = id.indexOf(typeof x);
-  // false if -1 otherwise true, but fast!!!!1
+  var id = ['boolean', 'number', 'string', 'object'];
+  var idx = id.indexOf(typeof x);
+  //false if -1 otherwise true, but fast!!!!1
   if (~idx) {
     if (x === null) {
       return 1;
@@ -127,7 +127,7 @@ function collationIndex(x) {
 }
 
 function sortObjectPropertiesByKey(queryParams) {
-  return Object.keys(queryParams).sort(collate).reduce((result, key) => {
+  return Object.keys(queryParams).sort(collate).reduce(function (result, key) {
     result[key] = queryParams[key];
     return result;
   }, {});
@@ -136,11 +136,11 @@ function sortObjectPropertiesByKey(queryParams) {
 // Generate a unique id particular to this replication.
 // Not guaranteed to align perfectly with CouchDB's rep ids.
 function generateReplicationId(src, target, opts) {
-  const docIds = opts.doc_ids ? opts.doc_ids.sort(collate) : '';
-  const filterFun = opts.filter ? opts.filter.toString() : '';
-  let queryParams = '';
-  let filterViewName = '';
-  let selector = '';
+  var docIds = opts.doc_ids ? opts.doc_ids.sort(collate) : '';
+  var filterFun = opts.filter ? opts.filter.toString() : '';
+  var queryParams = '';
+  var filterViewName =  '';
+  var selector = '';
 
   // possibility for checkpoints to be lost here as behaviour of
   // JSON.stringify is not stable (see #6226)
@@ -157,35 +157,35 @@ function generateReplicationId(src, target, opts) {
     filterViewName = opts.view.toString();
   }
 
-  return Promise.all([src.id(), target.id()]).then((res) => {
-    const queryData = res[0] + res[1] + filterFun + filterViewName
-      + queryParams + docIds + selector;
-    return new Promise(((resolve) => {
+  return Promise.all([src.id(), target.id()]).then(function (res) {
+    var queryData = res[0] + res[1] + filterFun + filterViewName +
+      queryParams + docIds + selector;
+    return new Promise(function (resolve) {
       binaryMd5(queryData, resolve);
-    }));
-  }).then((md5sum) => {
+    });
+  }).then(function (md5sum) {
     // can't use straight-up md5 alphabet, because
     // the char '/' is interpreted as being for attachments,
     // and + is also not url-safe
     md5sum = md5sum.replace(/\//g, '.').replace(/\+/g, '_');
-    return `_local/${md5sum}`;
+    return '_local/' + md5sum;
   });
 }
 
 // simplified API. universal browser support is assumed
 function readAsArrayBuffer(blob, callback) {
-  const reader = new FileReader();
+  var reader = new FileReader();
   reader.onloadend = function (e) {
-    const result = e.target.result || new ArrayBuffer(0);
+    var result = e.target.result || new ArrayBuffer(0);
     callback(result);
   };
   reader.readAsArrayBuffer(blob);
 }
 
-const setImmediateShim = global.setImmediate || global.setTimeout;
-const MD5_CHUNK_SIZE = 32768;
+var setImmediateShim = global.setImmediate || global.setTimeout;
+var MD5_CHUNK_SIZE = 32768;
 
-const thisBtoa = function (str) {
+var thisBtoa = function (str) {
   return btoa(str);
 };
 
@@ -205,7 +205,7 @@ function appendBlob(buffer, blob, start, end, callback) {
     // only slice blob if we really need to
     blob = sliceBlob(blob, start, end);
   }
-  readAsArrayBuffer(blob, (arrayBuffer) => {
+  readAsArrayBuffer(blob, function (arrayBuffer) {
     buffer.append(arrayBuffer);
     callback();
   });
@@ -221,29 +221,29 @@ function appendString(buffer, string, start, end, callback) {
 }
 
 function binaryMd5(data, callback) {
-  const inputIsString = typeof data === 'string';
-  const len = inputIsString ? data.length : data.size;
-  const chunkSize = Math.min(MD5_CHUNK_SIZE, len);
-  const chunks = Math.ceil(len / chunkSize);
-  let currentChunk = 0;
-  const buffer = inputIsString ? new Md5() : new Md5.ArrayBuffer();
+  var inputIsString = typeof data === 'string';
+  var len = inputIsString ? data.length : data.size;
+  var chunkSize = Math.min(MD5_CHUNK_SIZE, len);
+  var chunks = Math.ceil(len / chunkSize);
+  var currentChunk = 0;
+  var buffer = inputIsString ? new Md5() : new Md5.ArrayBuffer();
 
-  const append = inputIsString ? appendString : appendBlob;
+  var append = inputIsString ? appendString : appendBlob;
 
   function next() {
     setImmediateShim(loadNextChunk);
   }
 
   function done() {
-    const raw = buffer.end(true);
-    const base64 = rawToBase64(raw);
+    var raw = buffer.end(true);
+    var base64 = rawToBase64(raw);
     callback(base64);
     buffer.destroy();
   }
 
   function loadNextChunk() {
-    const start = currentChunk * chunkSize;
-    const end = start + chunkSize;
+    var start = currentChunk * chunkSize;
+    var end = start + chunkSize;
     currentChunk++;
     if (currentChunk < chunks) {
       append(buffer, data, start, end, next);
