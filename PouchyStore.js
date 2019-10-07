@@ -35,7 +35,6 @@ export default class PouchyStore {
     if (!('optionsRemote' in this)) {
       this.optionsRemote = {};
     }
-    console.log(this)
     this.initializeProperties();
   }
 
@@ -118,7 +117,7 @@ export default class PouchyStore {
     } else if (this.isUseData) {
       this.data = docs.filter(doc => !('deletedAt' in doc) || doc.deletedAt === null);
       this.sortData(this.data);
-      this.data = this.filterView(this.data)
+      this.data = this.filterData(this.data)
     }
 
     this.isInitialized = true;
@@ -169,14 +168,14 @@ export default class PouchyStore {
         }
       }
       this.sortData(this.data);
-      this.data = this.filterView(this.data);
+      this.data = this.filterData(this.data);
     }
   }
 
   sortData(data) {
     // do no sorting, override this method to sort
   }
-  filterView(data) {
+  filterData(data) {
     return data;
     //do no filter, override this method to filter
   }
