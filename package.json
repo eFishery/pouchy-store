@@ -1,6 +1,6 @@
 {
   "name": "pouchy-store",
-  "version": "0.1.3",
+  "version": "0.1.6",
   "description": "Libraries to ease pouch-couch stack on offline first app",
   "main": "index.js",
   "scripts": {
