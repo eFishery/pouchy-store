@@ -60,7 +60,7 @@ export default class PouchyStore {
     this.dbRemote = null;
   }
 
-  async initialize() {
+  async initialize(isSyncRemote = true) {
     if (this.isInitialized) return;
 
     if (!this.name) {
@@ -97,15 +97,17 @@ export default class PouchyStore {
     this.watchMeta();
 
     if (this.isUseRemote) {
-      // sync data local-remote
-      try {
-        await checkInternet(this.urlRemote);
-        await this.dbLocal.replicate.from(this.dbRemote, {
-          batch_size: 1000,
-          batches_limit: 2,
-        });
-      } catch (err) {
-        console.e(err);
+      if (isSyncRemote) {
+        // sync data local-remote
+        try {
+          await checkInternet(this.urlRemote);
+          await this.dbLocal.replicate.from(this.dbRemote, {
+            batch_size: 1000,
+            batches_limit: 2,
+          });
+        } catch (err) {
+          console.e(err);
+        }
       }
       await this.initUnuploadeds();
     }
