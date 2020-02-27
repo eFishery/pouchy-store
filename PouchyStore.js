@@ -35,6 +35,9 @@ export default class PouchyStore {
     if (!('optionsRemote' in this)) {
       this.optionsRemote = {};
     }
+    if(!('optionsTimout' in this)){
+      this.timeOut = 5;
+    }
     this.initializeProperties();
   }
 
@@ -62,7 +65,9 @@ export default class PouchyStore {
 
   async initialize() {
     if (this.isInitialized) return;
-
+    if(this.optionsTimeout){
+      this.timeOut = this.optionsTimeout;
+    }
     if (!this.name) {
       throw new Error('store must have name');
     }
@@ -99,7 +104,7 @@ export default class PouchyStore {
     if (this.isUseRemote) {
       // sync data local-remote
       try {
-        await checkInternet(this.urlRemote);
+        await checkInternet(this.urlRemote, this.timeOut);
         await this.dbLocal.replicate.from(this.dbRemote, {
           batch_size: 1000,
           batches_limit: 2,
@@ -299,7 +304,7 @@ export default class PouchyStore {
   async upload() {
     if (!this.isUseRemote) return;
 
-    await checkInternet(this.urlRemote);
+    await checkInternet(this.urlRemote, this.timeOut);
 
     await this.dbLocal.replicate.to(this.dbRemote);
     const ids = Object.keys(this.dataMeta.unuploadeds);

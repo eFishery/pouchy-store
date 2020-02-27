@@ -1,6 +1,4 @@
-const TIMEOUT_INTERNET_CHECK = 5; // seconds
-
-const checkInternet = (url) => {
+const checkInternet = (url, TIMEOUT_INTERNET_CHECK) => {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       reject(new Error('No internet connection'));
