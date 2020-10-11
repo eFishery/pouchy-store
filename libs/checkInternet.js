@@ -16,4 +16,4 @@ const checkInternet = (url) => {
   });
 }
 
-export default checkInternet;
+module.exports = checkInternet;

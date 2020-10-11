@@ -9,84 +9,72 @@ Install this library using
 
 Import `PouchyStore` from library in your Model Class
 ```
-import PouchyStore from 'pouchy-store';
+import {PouchyStore} from 'pouchy-store';
+import config from '../config';
 
 class ModelStore extends PouchyStore {
   get name() {
-    return this._name;
-  }
-
-  setName(dbName) {
-    this._name = dbName;
+    return 'model';
   }
 
   get urlRemote() {
-    return "http://couch-remote-url.com";
+    return config.couchDBUrl;
   }
 
   get optionsRemote() {
     return {
-      auth: {
-	    username: 'admin',
-	    password: 'adminpassword',
-	  }
+      auth: config.couchDBAuth,
     };
   }
 }
 
 export default new ModelStore();
+
 ```
 Use your model class in your app (React Example)
 ```
-import modelStore from 'ModelStore';
+import ModelStore from './storage/modelstore';
+import {UsePouchy} from 'pouchy-store';
 
-class App extends React {
-	async componentDidUpdate() {
-		if (!modelStore.isInitialized) {
-		  modelStore.setName("dbName");	// to set databasename for model
-		  await modelStore.initialize(); // to initialize database locally by getting synced
-		}
-	}
-
-	render() {
-        modelStore.data.forEach(item => console.log(item)); // access all the data in store
-		modelStore.countUnuploadeds(); // to show number of unoploaded/synced items
-		modelStore.dataMeta.tsUpload; // to show last timestamp uploaded/synced
-		await modelStore.addItem({
-          someField: 'someValue',
-          anotherField: 'anotherValue',
-        });
-		await modelStore.deleteItem();
-		await modelStore.upload(); // to upload/sync database local-remote
-	}
-
-	componentDidMount() {
-		this.unsubTodos = modelStore.subscribe(this.rerender); // set callback when there is a change in store's data
-	}
-
-	componentWillUnmount() {
-		this.unsubTodos();
-		await modelStore.deinitialize(); // to destroy database locally if it's needed
-	}
-
-	rerender = () => {
-        this.setState({
-          _rerender: new Date(),
-        });
-    }
+const Home = props => {
+    const [isInit, setInit] = useState(false);
+    const leadInitializing = async () => {
+        await ModelStore.initialize();
+        await ModelStore.initializeRemote();
+        setInit(true);
+    };
+    
+    // you can use any options on couchDB query, and pouchDB-find
+    // fetch-id used to force-update when option changes
+    const [dataModel] = usePouchy(ModelStore, {
+        selector: {
+          _id: {
+            $eq: 'someUUID',
+          },
+        },
+        field: ['name','_id']
+        limit: 10,
+        sort: ['name'],
+    }, 'fetch-id');
+    
+    useEffect(() => {
+        if (!isInit) {
+            initiate();
+        }
+    }, [isInit]);
+    
+    return (
+        <SomeComponentWithFlatList dataForFlatList={dataModel}/>
+    );
 }
 ```
 Available API for CRUD operation:
 ```
-	/* manipulation of array data (non-single) */
+	/* manipulation of array data */
 	addItem(payload)
 	addItemWithId(id, payload)
 	editItem(id, payload)
 	deleteItem(id)
-
-	/* manipulation of single data (non-array) */
-	editSingle(payload)
-	deleteSingle()
 ```
 
 

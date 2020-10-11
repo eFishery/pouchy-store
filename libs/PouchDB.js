@@ -1,6 +1,7 @@
-import IPouchDB from 'pouchdb';
+const IPouchDB = require('pouchdb');
+IPouchDB.plugin(require('pouchdb-find'));
 
-export default class PouchDB extends IPouchDB {
+class PouchDB extends (IPouchDB.default || IPouchDB) {
   async getFailSafe(id) {
     try {
       const doc = await this.get(id);
@@ -14,16 +15,19 @@ export default class PouchDB extends IPouchDB {
   }
 
   async update(id, obj) {
-    const doc = await this.getFailSafe(id) || { _id: id };
+    const doc = (await this.getFailSafe(id)) || { _id: id };
     Object.assign(doc, obj);
     const info = await this.put(doc);
     return info;
   }
 
   static createId() {
-    let id = (new Date()).getTime().toString(16);
+    let id = new Date().getTime().toString(16);
     while (id.length < 32) {
-      id += Math.random().toString(16).split('.').pop();
+      id += Math.random()
+        .toString(16)
+        .split('.')
+        .pop();
     }
     id = id.substr(0, 32);
     id = id.replace(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/, '$1-$2-$3-$4-$5');
@@ -42,3 +46,5 @@ export default class PouchDB extends IPouchDB {
     return docs;
   }
 }
+
+module.exports = PouchDB;
