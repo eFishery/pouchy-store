@@ -1,22 +1,25 @@
 import React from 'react';
 
-export const usePouchy = (store, options = {}, id = null) => {
+export const usePouchy = (store, options = {}) => {
   const [data, setData] = React.useState([]);
   const refStore = React.useRef(store);
-  // const refOptions = React.useRef(options);
+  const optionsJson = JSON.stringify(options);
 
   React.useEffect(() => {
+    const optionsObj = JSON.parse(optionsJson);
+
     if (store.isInitialized) {
       (async () => {
-        const newData = await refStore.current.getDocuments(options);
+        const newData = await refStore.current.getDocuments(optionsObj);
         setData(newData);
       })();
 
-      return refStore.current.subscribe(newData => {
+      return refStore.current.subscribe(() => {
+        const newData = await refStore.current.getDocuments(optionsObj);
         setData(newData);
-      }, options);
+      }, optionsObj);
     }
-  }, [store.isInitialized, id]);
+  }, [store.isInitialized, optionsJson]);
 
   return [data];
 };

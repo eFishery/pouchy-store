@@ -388,12 +388,12 @@ class PouchyStore {
         ...options,
       });
       for (const result of res.docs) {
+        if (result._deleted) continue;
+        if (result.deletedAt) continue;
         data.push(result);
       }
     } catch (error) {
       console.log(error);
-      const resultFetch = this.fetchData(options);
-      data = resultFetch;
     }
 
     return data;
@@ -401,12 +401,7 @@ class PouchyStore {
 
   subscribe(callback, options = {}) {
     const onChanges = async () => {
-      try {
-        const data = await this.fetchData(options);
-        callback(data, null);
-      } catch (err) {
-        callback(null, err);
-      }
+      callback();
     };
 
     let debounceTimeoutId = null;

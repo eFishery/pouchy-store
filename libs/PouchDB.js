@@ -1,7 +1,9 @@
-const IPouchDB = require('pouchdb');
+const _IPouchDB = require('pouchdb');
+const IPouchDB = _IPouchDB.default || _IPouchDB;
+
 IPouchDB.plugin(require('pouchdb-find'));
 
-class PouchDB extends (IPouchDB.default || IPouchDB) {
+class PouchDB extends IPouchDB {
   async getFailSafe(id) {
     try {
       const doc = await this.get(id);
