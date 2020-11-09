@@ -1,3 +1,3 @@
-import PouchyStore from './PouchyStore';
-
-export default PouchyStore;
+const PouchyStore = require('./PouchyStore');
+const usePouchy = require('./react');
+module.exports = { PouchyStore, usePouchy };
