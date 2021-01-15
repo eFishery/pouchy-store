@@ -264,7 +264,15 @@ class PouchyStore {
 
   async upload() {
     await checkInternet(this.urlRemote);
-    await this.dbLocal.replicate.to(this.dbRemote);
+    await new Promise((resolve, reject) => {
+      this.dbLocal.replicate.to(this.dbRemote, {
+        live: false,
+      }).on('complete', (info) => {
+        resolve(info);
+      }).on('error', (err) => {
+        reject(err);
+      });
+    });
 
     this.dataMeta.tsUpload = new Date().toJSON();
     this.persistMeta();
